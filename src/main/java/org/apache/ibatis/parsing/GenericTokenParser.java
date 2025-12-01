@@ -17,10 +17,17 @@ package org.apache.ibatis.parsing;
 
 /**
  * @author Clinton Begin
+ * 主要的作用就是找到需要处理的参数，例如：#{id}、${id}、@{id}，将参数交给对应的TokenHandler
  */
 public class GenericTokenParser {
 
+  /**
+   * 开始的 Token 字符串，例如：#{、${、@{
+   */
   private final String openToken;
+  /**
+   * 结束的 Token 字符串，例如：}
+   */
   private final String closeToken;
   private final TokenHandler handler;
 
@@ -30,6 +37,11 @@ public class GenericTokenParser {
     this.handler = handler;
   }
 
+  /**
+   * 解析sql,处理动态参数
+   * @param text e.g: select * form user where id = #{id}
+   * @return
+   */
   public String parse(String text) {
     if (text == null || text.isEmpty()) {
       return "";
@@ -42,20 +54,29 @@ public class GenericTokenParser {
     char[] src = text.toCharArray();
     int offset = 0;
     final StringBuilder builder = new StringBuilder();
-    StringBuilder expression = null;
+    StringBuilder expression = null; // 匹配到 openToken 和 closeToken 之间的表达式
     while (start > -1) {
+      // 转义字符
       if (start > 0 && src[start - 1] == '\\') {
         // this open token is escaped. remove the backslash and continue.
+        // 因为 openToken 前面一个位置是 \ 转义字符，所以忽略 \
+        // 添加 [offset, start - offset - 1] 和 openToken 的内容，添加到 builder 中
         builder.append(src, offset, start - offset - 1).append(openToken);
+        // 修改 offset
         offset = start + openToken.length();
+
+      // 非转义字符
       } else {
         // found open token. let's search close token.
+        // 创建/重置 expression 对象
         if (expression == null) {
           expression = new StringBuilder();
         } else {
           expression.setLength(0);
         }
+        // 添加 offset 和 openToken 之间的内容，添加到 builder 中，即表达式之前的内容
         builder.append(src, offset, start - offset);
+        // 修改 offset
         offset = start + openToken.length();
         int end = text.indexOf(closeToken, offset);
         while (end > -1) {
@@ -82,6 +103,7 @@ public class GenericTokenParser {
       start = text.indexOf(openToken, offset);
     }
     if (offset < src.length) {
+      // 添加表达式之后的内容
       builder.append(src, offset, src.length - offset);
     }
     return builder.toString();

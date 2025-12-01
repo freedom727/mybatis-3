@@ -16,6 +16,7 @@
 package org.apache.ibatis.parsing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -49,6 +50,11 @@ public class GenericTokenParserTest {
         put("last_name", "Kirk");
         put("var{with}brace", "Hiya");
         put("", "");
+        put("}", "后括号");
+        put("\\}", "转义后括号");
+        put("{", "前括号");
+        put("\\{", "转义前括号");
+        put("\\${", "opentoken");
       }
     }));
 
@@ -68,6 +74,13 @@ public class GenericTokenParserTest {
     assertEquals("{$$something}JamesTKirk", parser.parse("{$$something}${first_name}${initial}${last_name}"));
     assertEquals("${", parser.parse("${"));
     assertEquals("${\\}", parser.parse("${\\}"));
+    assertEquals("后括号", parser.parse("${\\}}"));
+    assertEquals("转义后括号", parser.parse("${\\\\}}"));
+    // parser中识别的是${，不是{
+    assertNotEquals("前括号", parser.parse("${\\{}"));// 转义前括号
+    assertEquals("转义前括号", parser.parse("${\\{}"));// 转义前括号
+    assertEquals("opentoken", parser.parse("${\\${}"));// 转义opentoken
+    // 这里如果不把第一个}转义，就会识别"var{with"为变量
     assertEquals("Hiya", parser.parse("${var{with\\}brace}"));
     assertEquals("", parser.parse("${}"));
     assertEquals("}", parser.parse("}"));
