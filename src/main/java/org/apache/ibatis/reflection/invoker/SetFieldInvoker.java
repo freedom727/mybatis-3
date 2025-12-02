@@ -21,6 +21,7 @@ import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
+ * 通过反射直接设置字段值
  */
 public class SetFieldInvoker implements Invoker {
   private final Field field;

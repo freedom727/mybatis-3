@@ -63,6 +63,10 @@ public class ReflectorTest {
       return id;
     }
 
+    public Long getId(String s) {
+      return id;
+    }
+
     @Override
     public void setId(Long id) {
       this.id = id;

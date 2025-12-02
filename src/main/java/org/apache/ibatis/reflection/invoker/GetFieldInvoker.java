@@ -21,6 +21,7 @@ import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
+ * 通过反射直接获取字段值
  */
 public class GetFieldInvoker implements Invoker {
   private final Field field;

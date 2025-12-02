@@ -28,6 +28,10 @@ public final class PropertyNamer {
     // Prevent Instantiation of Static Class
   }
 
+  /**
+   * 通过方法名获取属性名
+   * @param name 如果字段前两位都是大写，则直接返回，如getIDCard，则返回IDCard
+   */
   public static String methodToProperty(String name) {
     if (name.startsWith("is")) {
       name = name.substring(2);

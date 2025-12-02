@@ -22,6 +22,9 @@ import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
+ * 专门存getter和setter方法
+ * 如果有get方法则通过get方法获取字段值，如果没有则走org.apache.ibatis.reflection.invoker.GetFieldInvoker
+ * 如果有set方法则通过set方法设置字段值，如果没有则走org.apache.ibatis.reflection.invoker.SetFieldInvoker
  */
 public class MethodInvoker implements Invoker {
 
@@ -31,9 +34,11 @@ public class MethodInvoker implements Invoker {
   public MethodInvoker(Method method) {
     this.method = method;
 
+    // 参数大小为 1 时，一般是 setting 方法，设置 type 为方法参数[0]
     if (method.getParameterTypes().length == 1) {
       type = method.getParameterTypes()[0];
     } else {
+      // 否则，一般是 getting 方法，设置 type 为返回类型
       type = method.getReturnType();
     }
   }
