@@ -84,6 +84,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
         }
       }
     } catch (Exception e) {
+      // 下面只是简单拼接参数类型和参数值，然后抛异常，不看
       StringBuilder argTypes = new StringBuilder();
       if (constructorArgTypes != null && !constructorArgTypes.isEmpty()) {
         for (Class<?> argType : constructorArgTypes) {
@@ -107,6 +108,10 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
   protected Class<?> resolveInterface(Class<?> type) {
     Class<?> classToCreate;
     if (type == List.class || type == Collection.class || type == Iterable.class) {
+      // Collection 是 List 和 Set 的父接口，表示一个集合类型。
+      //Iterable 是 Collection 的父接口，表示可遍历的集合类型。
+      //在很多情况下，代码并不关心具体是 List 还是 Set，只关心它是一个集合，因此返回一个 ArrayList 类型的实例是一个常见的默认行为。
+      // 实际上如果有明确指定Set的情况，在后面会进行处理
       classToCreate = ArrayList.class;
     } else if (type == Map.class) {
       classToCreate = HashMap.class;

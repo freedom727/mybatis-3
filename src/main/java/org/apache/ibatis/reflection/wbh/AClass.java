@@ -14,6 +14,14 @@ public class AClass implements AInterface<String> {
 
     private List<String> list;
 
+    public List<String> getList() {
+        return list;
+    }
+
+    public void setList(List<String> list) {
+        this.list = list;
+    }
+
     public static void main(String[] args) throws Exception {
         AClass obj = new AClass();
         Method func = AClass.class.getMethod("func", String.class);
