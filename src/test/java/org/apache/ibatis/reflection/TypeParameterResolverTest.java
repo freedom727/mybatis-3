@@ -17,12 +17,7 @@ package org.apache.ibatis.reflection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -148,6 +143,15 @@ public class TypeParameterResolverTest {
     Method method = clazz.getMethod("select", Object.class);
     Type result = TypeParameterResolver.resolveReturnType(method, clazz);
     assertEquals(String.class, result);
+  }
+
+  @Test
+  public void testReturn_Lv0Class() throws Exception {
+    Class<?> clazz = Level1Mapper.class;
+    Method method = clazz.getMethod("select");
+    Type result = TypeParameterResolver.resolveReturnType(method, clazz);
+    assertNotEquals(Object.class, result);// 拿到的是
+    assertTrue(result instanceof TypeVariable);
   }
 
   @Test

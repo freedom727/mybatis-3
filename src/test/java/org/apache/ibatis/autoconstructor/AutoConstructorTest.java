@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,6 +53,34 @@ public class AutoConstructorTest {
       final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
       final Object subject = mapper.getSubject(1);
       assertNotNull(subject);
+    }
+  }
+
+  @Test
+  public void fullyPopulatedSubject1() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+      final Object subject = mapper.getMySubject1(1,2,"a");
+      assertNotNull(subject);
+    }
+  }
+
+  @Test
+  public void testPropertyTokenizer() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+      MySubject subject = new MySubject();
+      subject.setName("test");
+
+      List<MySubject.SubObject> subObjects = new ArrayList<>();
+      MySubject.SubObject subObject = new MySubject.SubObject();
+      List<Integer> integers =new ArrayList<>();
+      integers.add(1);
+      subObject.setSmallList(integers);
+      subObjects.add(subObject);
+      subject.setSubObjects(subObjects);
+      final Object object = mapper.getMySubject(subject);
+      assertNotNull(object);
     }
   }
 

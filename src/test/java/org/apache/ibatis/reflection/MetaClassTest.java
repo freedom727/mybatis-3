@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.domain.misc.CustomBeanWrapperFactory;
 import org.apache.ibatis.domain.misc.RichType;
 import org.apache.ibatis.domain.misc.generics.GenericConcrete;
 import org.junit.jupiter.api.Test;
@@ -118,6 +119,23 @@ public class MetaClassTest {
     assertEquals(List.class, meta.getGetterType("richType.richList"));
     assertEquals(Map.class, meta.getGetterType("richType.richMap"));
     assertEquals(List.class, meta.getGetterType("richType.richList[0]"));
+    Class<?> getterType = meta.getGetterType("richType.list[0]");
+    System.out.println(getterType);
+  }
+
+  @Test
+  public void test01() {
+    RichType object = new RichType();
+
+    if (true) {
+      object.setRichType(new RichType());
+      object.getRichType().setRichMap(new HashMap());
+      object.getRichType().getRichMap().put("nihao", 123);
+    }
+
+    MetaObject meta = MetaObject.forObject(object, SystemMetaObject.DEFAULT_OBJECT_FACTORY, new CustomBeanWrapperFactory(), new DefaultReflectorFactory());
+    Class<?> clazz = meta.getObjectWrapper().getGetterType("richType.richMap.nihao");// class java.lang.Integer
+    System.out.println(clazz);
   }
 
   @Test

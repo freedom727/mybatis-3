@@ -26,11 +26,15 @@ import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 
 /**
+ * 类型参数解析器
+ *
  * @author Iwao AVE!
  */
 public class TypeParameterResolver {
 
   /**
+   * 解析属性类型，返回属性中的泛型对应的实际类型
+   *
    * @return The field type as {@link Type}. If it has type parameters in the declaration,<br>
    *         they will be resolved to the actual runtime {@link Type}s.
    */
@@ -41,6 +45,8 @@ public class TypeParameterResolver {
   }
 
   /**
+   * 如果是泛型参数，则返回org.apache.ibatis.reflection.TypeParameterResolver.ParameterizedTypeImpl类型
+   *
    * @return The return type of the method as {@link Type}. If it has type parameters in the declaration,<br>
    *         they will be resolved to the actual runtime {@link Type}s.
    */

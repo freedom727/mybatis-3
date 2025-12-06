@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.autoconstructor;
 
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -22,6 +23,13 @@ import java.util.List;
 public interface AutoConstructorMapper {
   @Select("SELECT * FROM subject WHERE id = #{id}")
   PrimitiveSubject getSubject(final int id);
+
+  @Select("SELECT * FROM subject WHERE id = #{subject.subObjects[0].smallList[0]}")
+  PrimitiveSubject getMySubject(@Param("subject") MySubject subject);
+
+  // 如果配置useActualParamName=false，那么参数名就是参数的索引，从0开始,第二个参数就能填2，一般可以填arg2，更保险一点的则是param3，非下标，自然序数
+  @Select("SELECT * FROM subject WHERE id = #{arg0} and name = #{param3}")
+  PrimitiveSubject getMySubject1(final int id, int id2, String name);
 
   @Select("SELECT * FROM subject")
   List<PrimitiveSubject> getSubjects();
