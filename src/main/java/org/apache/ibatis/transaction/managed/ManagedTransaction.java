@@ -25,6 +25,8 @@ import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 实现 Transaction 接口，基于容器管理的事务实现类，ManagedTransaction 是为“外部环境管理连接和事务”的场景设计的。
+ *
  * {@link Transaction} that lets the container manage the full lifecycle of the transaction.
  * Delays connection retrieval until getConnection() is called.
  * Ignores all commit or rollback requests.
@@ -41,6 +43,11 @@ public class ManagedTransaction implements Transaction {
   private DataSource dataSource;
   private TransactionIsolationLevel level;
   private Connection connection;
+  /**
+   * 是否关闭连接
+   *
+   * 这个属性是和 {@link org.apache.ibatis.transaction.jdbc.JdbcTransaction} 不同的
+   */
   private final boolean closeConnection;
 
   public ManagedTransaction(Connection connection, boolean closeConnection) {
@@ -74,6 +81,7 @@ public class ManagedTransaction implements Transaction {
 
   @Override
   public void close() throws SQLException {
+    // 如果开启关闭连接功能，则关闭连接
     if (this.closeConnection && this.connection != null) {
       if (log.isDebugEnabled()) {
         log.debug("Closing JDBC Connection [" + this.connection + "]");

@@ -26,6 +26,8 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionException;
 
 /**
+ * 实现 Transaction 接口，基于 JDBC 的事务实现类
+ *
  * {@link Transaction} that makes use of the JDBC commit and rollback facilities directly.
  * It relies on the connection retrieved from the dataSource to manage the scope of the transaction.
  * Delays connection retrieval until getConnection() is called.
@@ -64,27 +66,32 @@ public class JdbcTransaction implements Transaction {
 
   @Override
   public void commit() throws SQLException {
+    // 非自动提交，则执行提交事务
     if (connection != null && !connection.getAutoCommit()) {
       if (log.isDebugEnabled()) {
         log.debug("Committing JDBC Connection [" + connection + "]");
       }
       connection.commit();
     }
+    // 自动提交则忽略
   }
 
   @Override
   public void rollback() throws SQLException {
+    // 非自动提交。则回滚事务
     if (connection != null && !connection.getAutoCommit()) {
       if (log.isDebugEnabled()) {
         log.debug("Rolling back JDBC Connection [" + connection + "]");
       }
       connection.rollback();
     }
+    // 自动提交则忽略
   }
 
   @Override
   public void close() throws SQLException {
     if (connection != null) {
+      // 重置连接为自动提交
       resetAutoCommit();
       if (log.isDebugEnabled()) {
         log.debug("Closing JDBC Connection [" + connection + "]");
@@ -93,6 +100,11 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  /**
+   * 设置指定的 autoCommit 属性
+   *
+   * @param desiredAutoCommit 指定的 autoCommit 属性
+   */
   protected void setDesiredAutoCommit(boolean desiredAutoCommit) {
     try {
       if (connection.getAutoCommit() != desiredAutoCommit) {
@@ -110,6 +122,31 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  /**
+   * MyBatis 注释里已经提到一个核心逻辑：
+   *
+   * 有些数据库在执行 SELECT 也会开启事务，而且要求在关闭连接前必须 commit 或 rollback，否则会报错。
+   *
+   * 也就是说：
+   *
+   * 即使你只是查数据，没有显式开启事务
+   * → 某些数据库还是会自动开启事务
+   * → 如果你关闭时 autoCommit = false
+   * → 驱动会要求你 MUST commit/rollback
+   * → 否则 close() 会抛异常，导致连接无法正常关闭
+   *
+   * 比如：
+   *
+   * Sybase
+   *
+   * Oracle 某些旧驱动
+   *
+   * Informix
+   *
+   * PostgreSQL 的某些配置下也会启动读事务
+   *
+   * 这类数据库会因为 "事务还没结束" 导致 close() 报错
+   */
   protected void resetAutoCommit() {
     try {
       if (!connection.getAutoCommit()) {
@@ -131,14 +168,22 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  /**
+   * 获得 Connection 对象
+   *
+   * @throws SQLException 获得失败
+   */
   protected void openConnection() throws SQLException {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
+    // 获得连接
     connection = dataSource.getConnection();
+    // 设置隔离级别
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());
     }
+    // 设置 autoCommit 属性
     setDesiredAutoCommit(autoCommit);
   }
 
