@@ -24,21 +24,70 @@ import java.sql.SQLException;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
+ * 为什么 MyBatis 默认连接池（PooledConnection）采用 JDK 动态代理，而不是简单继承/包装(Connection wrapper)？
+ *
+ * 因为 MyBatis 只需要“拦截 close() 方法”，让 close() 不是真的关闭数据库连接，而是把连接归还到连接池。
+ * 使用 JDK 动态代理 可以：
+ *
+ * ✔ 拦截所有方法
+ * ✔ 无侵入、不需要继承、不需要实现所有 Connection 方法
+ * ✔ 保证兼容未来 JDBC 版本（减少维护成本）
+ * ✔ 避免继承冲突与第三方驱动不兼容，有些类无法继承，只能去实现接口，需要实现全部方法，维护成本增大
+ *
+ * 相比之下，包装类需要实现 Connection 的几十个方法，冗长、易错、难维护。
+ *
+ *
+ * @desc 实现 InvocationHandler 接口，池化的 Connection 对象
+ *
  * @author Clinton Begin
  */
 class PooledConnection implements InvocationHandler {
 
+  /**
+   * 关闭 Connection 方法名
+   */
   private static final String CLOSE = "close";
+  /**
+   * JDK Proxy 的接口
+   */
   private static final Class<?>[] IFACES = new Class<?>[] { Connection.class };
 
+  /**
+   * 对象的标识，基于 {@link #realConnection} 求 hashCode
+   */
   private final int hashCode;
+  /**
+   * 所属的 PooledDataSource 对象
+   */
   private final PooledDataSource dataSource;
+  /**
+   * 真实的 Connection 连接，当有人关闭connection的时候，会被本对象拦截，然后阻止关闭，改为放回连接池
+   */
   private final Connection realConnection;
+  /**
+   * 代理的 Connection 连接，即 {@link PooledConnection} 这个动态代理的 Connection 对象，jdk动态代理生成的代理对象
+   * PooledDataSource中获取connection时，拿到的实际上是这个动态代理对象
+   */
   private final Connection proxyConnection;
+  /**
+   * 从连接池中，获取走的时间戳
+   */
   private long checkoutTimestamp;
+  /**
+   * 对象创建时间
+   */
   private long createdTimestamp;
+  /**
+   * 最后更新时间
+   */
   private long lastUsedTimestamp;
+  /**
+   * 连接的标识，即 {@link PooledDataSource#expectedConnectionTypeCode}
+   */
   private int connectionTypeCode;
+  /**
+   * 是否有效
+   */
   private boolean valid;
 
   /**
@@ -54,6 +103,15 @@ class PooledConnection implements InvocationHandler {
     this.createdTimestamp = System.currentTimeMillis();
     this.lastUsedTimestamp = System.currentTimeMillis();
     this.valid = true;
+    // 代理的 Connection 连接，基于 JDK Proxy 创建 Connection 对象，并且 handler 对象就是 this ，也就是自己。
+    // 那意味着什么？后续对 proxyConnection 的所有方法调用，都会委托给 PooledConnection#invoke(Object proxy, Method method, Object[] args) 方法
+
+    //当执行构造方法时：
+    //1、对象的内存已经分配完毕
+    //2、this 引用已经存在
+    //3、字段初始化还可能未完成
+    //4、构造方法尚未执行完毕，对象还未完全初始化
+    //所以：在构造方法内部传递 this 给外部代码是允许的，
     this.proxyConnection = (Connection) Proxy.newProxyInstance(Connection.class.getClassLoader(), IFACES, this);
   }
 
@@ -65,6 +123,8 @@ class PooledConnection implements InvocationHandler {
   }
 
   /**
+   * 向数据库发起 “ping” 请求，判断连接是否真正有效
+   *
    * Method to see if the connection is usable
    *
    * @return True if the connection is usable
@@ -232,16 +292,19 @@ class PooledConnection implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
+    // <1> 判断是否为 CLOSE 方法，则将连接放回到连接池中，避免连接被关闭
     if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
       dataSource.pushConnection(this);
       return null;
     }
     try {
+      // <2.1> 判断非 Object 的方法，则先检查连接是否可用
       if (!Object.class.equals(method.getDeclaringClass())) {
         // issue #579 toString() should never fail
         // throw an SQLException instead of a Runtime
         checkConnection();
       }
+      // <2.2> 反射调用对应的方法,使用真实的连接对象
       return method.invoke(realConnection, args);
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);
