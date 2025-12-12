@@ -15,11 +15,11 @@
  */
 package org.apache.ibatis.cache.decorators;
 
+import org.apache.ibatis.cache.Cache;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
-
-import org.apache.ibatis.cache.Cache;
 
 /**
  * Lru (least recently used) cache decorator
@@ -51,6 +51,8 @@ public class LruCache implements Cache {
     keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
       private static final long serialVersionUID = 4267176411845948333L;
 
+      // LinkedHashMap自带的判断是否删除最老的元素方法，默认返回false，即不删除老数据
+      // 我们要做的就是重写这个方法，当满足一定条件时删除老数据
       @Override
       protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
         boolean tooBig = size() > size;
@@ -70,6 +72,7 @@ public class LruCache implements Cache {
 
   @Override
   public Object getObject(Object key) {
+    // 在LinkedHashMap中拿一下，把改元素放到队尾，也就是最近使用的
     keyMap.get(key); //touch
     return delegate.getObject(key);
   }
@@ -91,6 +94,8 @@ public class LruCache implements Cache {
   }
 
   private void cycleKeyList(Object key) {
+    // 这里放进去的时候如果超过缓存大小，会触发removeEldestEntry回调函数，在map中删除当前元素
+    // 然后在removeEldestEntry中记录了需要在缓存中删除的元素，所以这里判一次，如果不为空就在缓存中删了
     keyMap.put(key, key);
     if (eldestKey != null) {
       delegate.removeObject(eldestKey);

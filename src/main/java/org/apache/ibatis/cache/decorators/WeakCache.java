@@ -15,15 +15,17 @@
  */
 package org.apache.ibatis.cache.decorators;
 
+import org.apache.ibatis.cache.Cache;
+
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import org.apache.ibatis.cache.Cache;
-
 /**
+ * 基于 java.lang.ref.WeakReference 的 Cache 实现类
+ *
  * Weak Reference cache decorator.
  * Thanks to Dr. Heinz Kabutz for his guidance here.
  *
