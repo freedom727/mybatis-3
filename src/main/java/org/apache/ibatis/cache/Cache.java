@@ -18,6 +18,8 @@ package org.apache.ibatis.cache;
 import java.util.concurrent.locks.ReadWriteLock;
 
 /**
+ * 缓存容器接口。注意，它是一个容器，有点类似 HashMap ，可以往其中添加各种缓存
+ *
  * SPI for cache providers.
  *
  * One instance of cache will be created for each namespace.
@@ -80,6 +82,8 @@ public interface Cache {
   void clear();
 
   /**
+   * 获得容器中缓存的数量
+   *
    * Optional. This method is not called by the core.
    *
    * @return The number of elements stored in the cache (not its capacity).
@@ -87,12 +91,15 @@ public interface Cache {
   int getSize();
 
   /**
+   * 获得读取写锁。该方法可以忽略了已经。
+   *
    * Optional. As of 3.2.6 this method is no longer called by the core.
    *
    * Any locking needed by the cache must be provided internally by the cache provider.
    *
    * @return A ReadWriteLock
    */
+  @Deprecated
   ReadWriteLock getReadWriteLock();
 
 }

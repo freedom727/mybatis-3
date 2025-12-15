@@ -22,13 +22,27 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
+ * 支持打印日志的 Cache 实现类，其实只是简单地在进行缓存命中时打印了一下缓存命中率，真正的缓存实现是delegate
+ *
  * @author Clinton Begin
  */
 public class LoggingCache implements Cache {
 
+  /**
+   * MyBatis Log 对象
+   */
   private final Log log;
+  /**
+   * 装饰的 Cache 对象
+   */
   private final Cache delegate;
+  /**
+   * 统计请求缓存的次数
+   */
   protected int requests = 0;
+  /**
+   * 统计命中缓存的次数
+   */
   protected int hits = 0;
 
   public LoggingCache(Cache delegate) {

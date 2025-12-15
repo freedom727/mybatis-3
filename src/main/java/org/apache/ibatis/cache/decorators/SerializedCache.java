@@ -30,6 +30,8 @@ import org.apache.ibatis.cache.CacheException;
 import org.apache.ibatis.io.Resources;
 
 /**
+ * 支持序列化值的 Cache 实现类
+ *
  * @author Clinton Begin
  */
 public class SerializedCache implements Cache {
@@ -52,6 +54,7 @@ public class SerializedCache implements Cache {
 
   @Override
   public void putObject(Object key, Object object) {
+    // 不会抛出空指针异常。类型转换只是告诉编译器把这个 null 视为某种类型（这里是 Serializable），但 null 本身没有实际对象，因此不会去访问对象的方法或字段，也不会触发 NPE
     if (object == null || object instanceof Serializable) {
       delegate.putObject(key, serialize((Serializable) object));
     } else {
@@ -90,6 +93,11 @@ public class SerializedCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 序列化到 ByteArrayOutputStream 内部的字节数组（内存）。
+   * @param value
+   * @return
+   */
   private byte[] serialize(Serializable value) {
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
          ObjectOutputStream oos = new ObjectOutputStream(bos)) {
