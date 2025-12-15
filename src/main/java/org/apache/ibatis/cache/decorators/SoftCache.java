@@ -24,12 +24,27 @@ import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.ibatis.cache.Cache;
 
 /**
+ * 为什么 MyBatis 同时提供 SoftCache 和 WeakCache？
+ *
+ * 因为 GC 行为不可控：
+ *
+ * CMS / G1 / ZGC 对 SoftReference 行为不同
+ *
+ * MyBatis 给用户 选择权
+ *
+ * <cache eviction="SOFT"/>
+ *
+ * <cache eviction="WEAK"/>
+ *
  * Soft Reference cache decorator
  * Thanks to Dr. Heinz Kabutz for his guidance here.
  *
  * @author Clinton Begin
  */
 public class SoftCache implements Cache {
+  /**
+   * 强引用的键的队列
+   */
   private final Deque<Object> hardLinksToAvoidGarbageCollection;
   private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
   private final Cache delegate;
@@ -75,6 +90,7 @@ public class SoftCache implements Cache {
         delegate.removeObject(key);
       } else {
         // See #586 (and #335) modifications need more than a read lock
+        // 和弱引用的区别，这里加了一个同步锁，WeakCache 没有加锁，SoftCache 加锁，是一个历史 Bug 修复结果。
         synchronized (hardLinksToAvoidGarbageCollection) {
           hardLinksToAvoidGarbageCollection.addFirst(result);
           if (hardLinksToAvoidGarbageCollection.size() > numberOfHardLinks) {
@@ -94,6 +110,7 @@ public class SoftCache implements Cache {
 
   @Override
   public void clear() {
+    // 和弱引用的区别，这里加了一个同步锁
     synchronized (hardLinksToAvoidGarbageCollection) {
       hardLinksToAvoidGarbageCollection.clear();
     }
