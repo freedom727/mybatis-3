@@ -15,20 +15,24 @@
  */
 package org.apache.ibatis.type;
 
+import org.apache.ibatis.executor.result.ResultMapException;
+import org.apache.ibatis.session.Configuration;
+
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.ibatis.executor.result.ResultMapException;
-import org.apache.ibatis.session.Configuration;
-
 /**
+ * 实现 TypeHandler 接口，继承 TypeReference 抽象类，TypeHandler 基础抽象类
+ *
  * The base {@link TypeHandler} for references a generic type.
  * <p>
  * Important: Since 3.5.0, This class never call the {@link ResultSet#wasNull()} and
  * {@link CallableStatement#wasNull()} method for handling the SQL {@code NULL} value.
  * In other words, {@code null} value handling should be performed on subclass.
+ *
+ * 重要：从3.5.0开始，该类不再调用ResultSet.wasNull（）和CallableStatement.wasNull（）方法来处理SQL NULL值。换句话说，空值处理应该在子类上执行。
  * </p>
  *
  * @author Clinton Begin
@@ -54,6 +58,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
   @Override
   public void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
     if (parameter == null) {
+      // <1> 参数为空时，设置为 null 类型
       if (jdbcType == null) {
         throw new TypeException("JDBC requires that the JdbcType must be specified for all nullable parameters.");
       }
@@ -65,6 +70,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
                 "Cause: " + e, e);
       }
     } else {
+      // 参数非空时，设置对应的参数
       try {
         setNonNullParameter(ps, i, parameter, jdbcType);
       } catch (Exception e) {

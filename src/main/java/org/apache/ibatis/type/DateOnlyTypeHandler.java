@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import java.util.Date;
 
 /**
+ * 与DateTypeHandler不同的是JDBCType是sql.Date，而非Timestamp
+ *
  * @author Clinton Begin
  */
 public class DateOnlyTypeHandler extends BaseTypeHandler<Date> {
@@ -29,6 +31,7 @@ public class DateOnlyTypeHandler extends BaseTypeHandler<Date> {
   @Override
   public void setNonNullParameter(PreparedStatement ps, int i, Date parameter, JdbcType jdbcType)
       throws SQLException {
+    // 将 java Date 转换成 sql Date 类型
     ps.setDate(i, new java.sql.Date(parameter.getTime()));
   }
 
