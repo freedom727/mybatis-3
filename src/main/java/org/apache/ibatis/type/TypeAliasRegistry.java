@@ -24,8 +24,6 @@ import java.sql.ResultSet;
 import java.util.*;
 
 /**
- * TypeHandler 注册表，相当于管理 TypeHandler 的容器，从其中能获取到对应的 TypeHandler
- *
  * @author Clinton Begin
  */
 public class TypeAliasRegistry {
