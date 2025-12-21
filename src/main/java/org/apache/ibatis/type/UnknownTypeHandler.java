@@ -128,7 +128,7 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
     JdbcType jdbcType = safeGetJdbcTypeForColumn(rsmd, columnIndex);
     // 获得 Java Type 类型
     Class<?> javaType = safeGetClassForColumn(rsmd, columnIndex);
-    //获得对应的 TypeHandler 对象
+    // 获得对应的 TypeHandler 对象，
     if (javaType != null && jdbcType != null) {
       handler = typeHandlerRegistry.getTypeHandler(javaType, jdbcType);
     } else if (javaType != null) {
@@ -153,6 +153,7 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
     try {
       // 从 ResultSetMetaData 中，获得字段类型
       // 获得 Java Type
+      // getColumnClassName返回Java类的全限定名称
       return Resources.classForName(rsmd.getColumnClassName(columnIndex));
     } catch (Exception e) {
       return null;

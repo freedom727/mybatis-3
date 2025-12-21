@@ -70,6 +70,7 @@ public enum JdbcType {
   TIMESTAMP_WITH_TIMEZONE(Types.TIMESTAMP_WITH_TIMEZONE); // JDBC 4.2 JDK8
 
   public final int TYPE_CODE;
+  // 枚举类的查找方式和mybatis不期而遇，哈哈哈哈哈
   private static Map<Integer,JdbcType> codeLookup = new HashMap<>();
 
   static {

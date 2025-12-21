@@ -15,12 +15,14 @@
  */
 package org.apache.ibatis.type;
 
+import org.junit.jupiter.api.Test;
+
+import java.sql.Array;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import org.junit.jupiter.api.Test;
 
 public class IntegerTypeHandlerTest extends BaseTypeHandlerTest {
 
@@ -29,6 +31,19 @@ public class IntegerTypeHandlerTest extends BaseTypeHandlerTest {
   @Override
   @Test
   public void shouldSetParameter() throws Exception {
+    System.out.println(getClass().getGenericSuperclass());// class org.apache.ibatis.type.BaseTypeHandlerTest
+    System.out.println(IntegerTypeHandler.class.getGenericSuperclass());// org.apache.ibatis.type.BaseTypeHandler<java.lang.Integer>
+    System.out.println(IntegerTypeHandler.class.getSimpleName());// IntegerTypeHandler
+    System.out.println(IntegerTypeHandler.class.getName());// org.apache.ibatis.type.IntegerTypeHandler
+    System.out.println(IntegerTypeHandler.class.getTypeName());// org.apache.ibatis.type.IntegerTypeHandler
+
+
+    System.out.println(Array.class.getTypeName());
+
+    System.out.println(int[].class.getSimpleName());// int[]
+    System.out.println(int[].class.getName());// [I
+    System.out.println(int[].class.getTypeName());// int[]
+
     TYPE_HANDLER.setParameter(ps, 1, 100, null);
     verify(ps).setInt(1, 100);
   }

@@ -22,11 +22,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 别名的注解
+ *
  * @author Clinton Begin
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Alias {
+  /**
+   * @return 别名，不加别名的话，默认是类的简单名
+   */
   String value();
 }
