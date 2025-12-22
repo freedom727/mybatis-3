@@ -15,16 +15,18 @@
  */
 package org.apache.ibatis.io;
 
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.LogFactory;
-
 /**
+ * 解析器工具类，用于获得指定目录符合条件的类们。
+ *
  * <p>ResolverUtil is used to locate classes that are available in the/a class path and meet
  * arbitrary conditions. The two most common conditions are that a class implements/extends
  * another class, or that is it annotated with a specific annotation. However, through the use

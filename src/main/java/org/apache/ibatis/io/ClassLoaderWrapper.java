@@ -19,12 +19,15 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
+ * ClassLoader 包装器。可使用多个 ClassLoader 加载对应的资源，直到有一成功后返回资源
+ *
  * A class to wrap access to multiple class loaders making them work as one
  *
  * @author Clinton Begin
  */
 public class ClassLoaderWrapper {
 
+  //默认 ClassLoader 对象。目前不存在初始化该属性的构造方法。可通过 ClassLoaderWrapper.defaultClassLoader = xxx 的方式，进行设置。
   ClassLoader defaultClassLoader;
   ClassLoader systemClassLoader;
 
