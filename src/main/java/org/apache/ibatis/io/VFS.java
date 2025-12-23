@@ -15,6 +15,9 @@
  */
 package org.apache.ibatis.io;
 
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,9 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.LogFactory;
 
 /**
  * Provides a very simple API for accessing resources within an application server.
@@ -193,7 +193,7 @@ public abstract class VFS {
    * Recursively list the full resource path of all the resources that are children of all the
    * resources found at the specified path.
    *
-   * @param path The path of the resource(s) to list.
+   * @param path The path of the resource(s) to list. 类路径：如 org/apache/ibatis/io
    * @return A list containing the names of the child resources.
    * @throws IOException If I/O errors occur
    */

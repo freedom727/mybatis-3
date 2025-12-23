@@ -1,5 +1,5 @@
 /**
- *    Copyright 2009-2019 the original author or authors.
+ *    Copyright 2009-2025 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,13 +15,10 @@
  */
 package org.apache.ibatis.io;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
+
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -30,9 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.LogFactory;
 
 /**
  * A default implementation of {@link VFS} that works for most application servers.
@@ -140,16 +134,16 @@ public class DefaultVFS extends VFS {
         }
 
         // The URL prefix to use when recursively listing child resources
-        String prefix = url.toExternalForm();
+        String prefix = url.toExternalForm();// file:/D:/01work/01code/03third-part/github/mybatis-3/target/test-classes/org/apache/ibatis/io
         if (!prefix.endsWith("/")) {
           prefix = prefix + "/";
         }
 
         // Iterate over immediate children, adding files and recursing into directories
         for (String child : children) {
-          String resourcePath = path + "/" + child;
+          String resourcePath = path + "/" + child; // org/apache/ibatis/io + "/" + ClassLoaderWrapperTest.class
           resources.add(resourcePath);
-          URL childUrl = new URL(prefix + child);
+          URL childUrl = new URL(prefix + child);// file:/D:/01work/01code/03third-part/github/mybatis-3/target/test-classes/org/apache/ibatis/io/ClassLoaderWrapperTest.class
           resources.addAll(list(childUrl, resourcePath));
         }
       }
@@ -223,6 +217,9 @@ public class DefaultVFS extends VFS {
     }
 
     // If the file part of the URL is itself a URL, then that URL probably points to the JAR
+    // 不断剥离“协议包装”
+    // jar:file:/app/lib/mybatis.jar!/org/apache/ibatis/io --> file:/app/lib/mybatis.jar!/org/apache/ibatis/io
+    // --> /app/lib/mybatis.jar!/org/apache/ibatis/io --> 报错，结束死循环
     try {
       for (;;) {
         url = new URL(url.getFile());

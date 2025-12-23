@@ -18,6 +18,8 @@ package org.apache.ibatis.io;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 /**
  * Unit test for VFS getInstance method in multi-thread environment
  *
@@ -29,6 +31,21 @@ public class VFSTest {
   public void getInstanceShouldNotBeNull() throws Exception {
     VFS vsf = VFS.getInstance();
     Assertions.assertNotNull(vsf);
+  }
+
+  @Test
+  public void testDefaultVFS() throws IOException {
+    VFS vfs = VFS.getInstance();
+    // [org/apache/ibatis/io/ClassLoaderWrapperTest.class, org/apache/ibatis/io/ExternalResourcesTest.class,
+    // org/apache/ibatis/io/ResourcesTest.class, org/apache/ibatis/io/VFSTest.class,
+    // org/apache/ibatis/io/VFSTest$1.class, org/apache/ibatis/io/VFSTest$InstanceGetterProcedure.class,
+    // org/apache/ibatis/io/ClassLoaderWrapper.class, org/apache/ibatis/io/DefaultVFS.class,
+    // org/apache/ibatis/io/ExternalResources.class, org/apache/ibatis/io/JBoss6VFS.class,
+    // org/apache/ibatis/io/JBoss6VFS$VFS.class, org/apache/ibatis/io/JBoss6VFS$VirtualFile.class,
+    // org/apache/ibatis/io/ResolverUtil.class, org/apache/ibatis/io/ResolverUtil$AnnotatedWith.class,
+    // org/apache/ibatis/io/ResolverUtil$IsA.class, org/apache/ibatis/io/ResolverUtil$Test.class,
+    // org/apache/ibatis/io/Resources.class, org/apache/ibatis/io/VFS.class, org/apache/ibatis/io/VFS$VFSHolder.class]
+    System.out.println(vfs.list("org/apache/ibatis/io"));
   }
 
   @Test
