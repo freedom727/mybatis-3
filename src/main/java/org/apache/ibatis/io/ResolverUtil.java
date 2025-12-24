@@ -164,6 +164,8 @@ public class ResolverUtil<T> {
   }
 
   /**
+   * 判断指定目录下们，符合指定类的类们
+   *
    * Attempts to discover classes that are assignable to the type provided. In the case
    * that an interface is provided this method will collect implementations. In the case
    * of a non-interface class, subclasses will be collected.  Accumulated classes can be
@@ -186,6 +188,8 @@ public class ResolverUtil<T> {
   }
 
   /**
+   * 判断指定目录下们，符合指定注解的类们
+   *
    * Attempts to discover classes that are annotated with the annotation. Accumulated
    * classes can be accessed by calling {@link #getClasses()}.
    *
@@ -206,6 +210,8 @@ public class ResolverUtil<T> {
   }
 
   /**
+   * 获得指定包下，符合条件的类
+   *
    * Scans for classes starting at the package provided and descending into subpackages.
    * Each class is offered up to the Test as it is discovered, and if the Test returns
    * true the class is retained.  Accumulated classes can be fetched by calling
@@ -216,12 +222,16 @@ public class ResolverUtil<T> {
    *        classes, e.g. {@code net.sourceforge.stripes}
    */
   public ResolverUtil<T> find(Test test, String packageName) {
+    // <1> 把org.apache.ibatis转换成org/apache/ibatis
     String path = getPackagePath(packageName);
 
     try {
+      // <2> 获得路径下的所有文件
       List<String> children = VFS.getInstance().list(path);
+      // <3> 遍历
       for (String child : children) {
         if (child.endsWith(".class")) {
+          // 如果匹配，则添加到结果集
           addIfMatching(test, child);
         }
       }
@@ -252,6 +262,7 @@ public class ResolverUtil<T> {
   @SuppressWarnings("unchecked")
   protected void addIfMatching(Test test, String fqn) {
     try {
+      // org/apache/ibatis/type/ArrayTypeHandlerTest.class-->org.apache.ibatis.type.ArrayTypeHandlerTest
       String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
       ClassLoader loader = getClassLoader();
       if (log.isDebugEnabled()) {

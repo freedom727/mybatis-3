@@ -506,7 +506,7 @@ public final class TypeHandlerRegistry {
    * 扫描指定包下的所有 TypeHandler 类，并发起注册
    */
   public void register(String packageName) {
-    // 扫描指定包下的所有 TypeHandler 类
+    // 扫描指定包下的所有实现 TypeHandler 类
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
     resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
     Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();

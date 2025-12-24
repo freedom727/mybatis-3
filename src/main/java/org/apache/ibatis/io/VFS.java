@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 虚拟文件系统( Virtual File System )抽象类，用来查找指定路径下的的文件们
+ *
  * Provides a very simple API for accessing resources within an application server.
  *
  * @author Ben Gunter
@@ -35,13 +37,22 @@ import java.util.List;
 public abstract class VFS {
   private static final Log log = LogFactory.getLog(VFS.class);
 
-  /** The built-in implementations. */
+  /**
+   * 内置的 VFS 实现类的数组
+   * The built-in implementations.
+   * */
   public static final Class<?>[] IMPLEMENTATIONS = { JBoss6VFS.class, DefaultVFS.class };
 
-  /** The list to which implementations are added by {@link #addImplClass(Class)}. */
+  /**
+   * 自定义的 VFS 实现类的数组
+   * The list to which implementations are added by {@link #addImplClass(Class)}.
+   * */
   public static final List<Class<? extends VFS>> USER_IMPLEMENTATIONS = new ArrayList<>();
 
-  /** Singleton instance holder. */
+  /**
+   * 通过私有静态内部类来实现单例，终于有看到这种单例的实现方式了，不然白学了
+   * Singleton instance holder.
+   * */
   private static class VFSHolder {
     static final VFS INSTANCE = createVFS();
 
