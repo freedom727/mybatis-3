@@ -29,10 +29,23 @@ public class Slf4jImpl implements Log {
 
   private Log log;
 
+  /**
+   * @param clazz org.apache.ibatis.logging.LogFactory
+   */
   public Slf4jImpl(String clazz) {
+    // MyBatis 的 Log ≈ 对真实 Logger 的轻量包装
     Logger logger = LoggerFactory.getLogger(clazz);
 
+    // 一个可选的接口，帮助与能够提取位置信息的日志系统集成。
+    // 该接口主要被jcl-over-slf4j、july -to- SLF4J、log4j-over-slf4j等SLF4J桥接器或需要提供提示的Logger包装器使用，
+    // 以便底层日志系统提取正确的位置信息（方法名、行号）。
     if (logger instanceof LocationAwareLogger) {
+
+      // 解决 日志行号定位错误问题
+      //
+      //普通 SLF4J → 日志显示的是 MyBatis 的类
+      //
+      //LocationAware → 能正确显示调用你 mapper 的代码行
       try {
         // check for slf4j >= 1.6 method signature
         logger.getClass().getMethod("log", Marker.class, String.class, int.class, String.class, Object[].class, Throwable.class);

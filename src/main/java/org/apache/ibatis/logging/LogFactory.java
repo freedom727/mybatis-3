@@ -31,6 +31,7 @@ public final class LogFactory {
   private static Constructor<? extends Log> logConstructor;
 
   static {
+    // 按照下面的顺序进行绑定，一旦找到了，后续的就没用了
     tryImplementation(LogFactory::useSlf4jLogging);
     tryImplementation(LogFactory::useCommonsLogging);
     tryImplementation(LogFactory::useLog4J2Logging);
@@ -83,10 +84,17 @@ public final class LogFactory {
     setImplementation(org.apache.ibatis.logging.stdout.StdOutImpl.class);
   }
 
+  // ✔ 零开销
+  // ✔ 默认兜底
+  // ✔ 适合极限性能环境
   public static synchronized void useNoLogging() {
     setImplementation(org.apache.ibatis.logging.nologging.NoLoggingImpl.class);
   }
 
+  // 尝试绑定log实现，一旦有一个实现被绑定，后续被放弃，顺序见上面
+  // ✔ 吃掉一切异常
+  // ✔ 不污染启动流程
+  // ✔ “能用就用，用不了拉倒”
   private static void tryImplementation(Runnable runnable) {
     if (logConstructor == null) {
       try {
@@ -100,6 +108,8 @@ public final class LogFactory {
   private static void setImplementation(Class<? extends Log> implClass) {
     try {
       Constructor<? extends Log> candidate = implClass.getConstructor(String.class);
+      // 这里之所以传LogFactory.class.getName()，纯粹是因为这里是为了试探一下日志打印有没有问题，
+      // 不能直接用getClass().getName()的原因是这里是静态方法，所以只能用LogFactory.class.getName()
       Log log = candidate.newInstance(LogFactory.class.getName());
       if (log.isDebugEnabled()) {
         log.debug("Logging initialized using '" + implClass + "' adapter.");
